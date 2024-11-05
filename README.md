@@ -4,19 +4,20 @@ This is a full-stack web application for ordering food online. The project inclu
 
 ## Features
 
-- Browse food items
-- Add items to cart
+- User authentication and authorization
+- Browse and search for food items
+- Add items to the cart
 - Place orders
-- User authentication
-- Order history
+- View order history
 
 ## Technologies Used
 
 ### Frontend
+
 - React
-- CSS
 
 ### Backend
+
 - Node.js
 
 ## Installation
@@ -31,19 +32,15 @@ This is a full-stack web application for ordering food online. The project inclu
     cd food-order-web-app
     ```
 
-3. Install frontend dependencies:
+3. Install dependencies for both frontend and backend:
     ```bash
     cd frontend
     npm install
-    ```
-
-4. Install backend dependencies:
-    ```bash
     cd ../backend
     npm install
     ```
 
-## Usage
+## Running the Application
 
 1. Start the backend server:
     ```bash
@@ -53,7 +50,7 @@ This is a full-stack web application for ordering food online. The project inclu
 
 2. Start the frontend development server:
     ```bash
-    cd ../frontend
+    cd frontend
     npm start
     ```
 
