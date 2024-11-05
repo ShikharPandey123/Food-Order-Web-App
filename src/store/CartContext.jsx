@@ -1,91 +1,89 @@
 import { createContext, useReducer } from "react";
-import fetchAvailableMeals from "../http.js";
 const CartContext = createContext({
-    items:[],
-    addItemToCart: ()=>{},
-    updateItemQuantity: ()=>{}
-})
+  items: [],
+  addItem: (item) => {},
+  removeItem: (id) => {},
+  clearCart: () => {},
+});
 
 function cartReducer(state, action) {
   if (action.type === "ADD_ITEM") {
-    const updatedItems = [...state.items];
-    const existingCartItemIndex = updatedItems.findIndex(
+    const existingCartItemIndex = state.items.findIndex(
       (item) => item.id === action.item.id
     );
-    const existingCartItem = updatedItems[existingCartItemIndex];
-    if (existingCartItem) {
+    const updatedItems = [...state.items];
+    if (existingCartItemIndex > -1) {
+      const existingItem = updatedItems[existingCartItemIndex];
       const updatedItem = {
-        ...existingCartItem,
-        quantity: existingCartItem.quantity + 1,
+        ...existingItem,
+        quantity: existingItem.quantity + 1,
       };
       updatedItems[existingCartItemIndex] = updatedItem;
     } else {
       updatedItems.push({
-        id: action.payload.id,
-        name: action.payload.title,
-        price: action.payload.price,
+        id: action.item.id,
+        name: action.item.name,
+        price: action.item.price,
         quantity: 1,
       });
     }
 
     return {
+      ...state,
       items: updatedItems,
     };
   }
-  if (action.type === "UPDATE_ITEM") {
-    const updatedItems = [...state.items];
-    const updatedItemIndex = updatedItems.findIndex(
-      (item) => item.id === action.item.id
+  if (action.type === "REMOVE_ITEM") {
+    const existingCartItemIndex = state.items.findIndex(
+      (item) => item.id === action.id
     );
-    const updatedItem = {
-      ...updatedItems[updatedItemIndex],
-    };
-    updatedItem.quantity += action.payload.amount;
-    if (updatedItem.quantity <= 0) {
-      updatedItems.splice(updatedItemIndex, 1);
+    const existingCartItem = state.items[existingCartItemIndex];
+    const updatedItems = [...state.items];
+    if (existingCartItem.quantity == 1) {
+      updatedItems.splice(existingCartItemIndex, 1);
     } else {
-      updatedItems[updatedItemIndex] = updatedItem;
+      const updatedItem = {
+        ...existingCartItem,
+        quantity: existingCartItem.quantity - 1,
+      };
+      updatedItems[existingCartItemIndex] = updatedItem;
     }
     return {
       ...state,
       items: updatedItems,
     };
   }
+  if (action.type === "CLEAR_CART") {
+    return {
+      ...state,
+      items: [],
+    };
+  }
   return state;
 }
 export function CartContextProvider({ children }) {
-  const [CartState, CartDispatch] = useReducer(cartReducer, { items: [] });
-  async function handleAddItemToCart(id) {
-    try {
-      const fetchedMeals = await fetchAvailableMeals();
-      const meal = fetchedMeals.find((meal) => meal.id === id);
-      if (meal) {
-        CartDispatch({
-          type: "ADD_ITEM",
-          item: {
-            id: meal.id,
-            name: meal.title,
-            price: meal.price,
-          },
-        });
-      }
-    } catch (error) {
-      console.error("Error fetching meals:", error);
-    }
-  }
-  function handleUpdateCartItemQuantity(mealID, amount) {
+  const [Cart, CartDispatch] = useReducer(cartReducer, { items: [] });
+  function addItem(item) {
     CartDispatch({
-      type: "UPDATE_ITEM",
-      payload: {
-        mealID,
-        amount,
-      },
+      type: "ADD_ITEM",
+      item,
     });
   }
+
+  function removeItem(id) {
+    CartDispatch({
+      type: "REMOVE_ITEM",
+      id,
+    });
+  }
+  function clearCart() {
+    CartDispatch({ type: "CLEAR_CART" });
+  }
   const ctxValue = {
-    items: CartState.items,
-    addItemToCart: handleAddItemToCart,
-    updateItemQuantity: handleUpdateCartItemQuantity,
+    items: Cart.items,
+    addItem,
+    removeItem,
+    clearCart,
   };
   return (
     <CartContext.Provider value={ctxValue}>{children}</CartContext.Provider>

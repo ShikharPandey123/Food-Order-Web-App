@@ -1,41 +1,34 @@
 import headerImg from "../assets/logo.jpg";
-import Button from "./UI/Button.jsx";
-import CartModal from "./CartModal.jsx";
 import CartContext from "../store/CartContext.jsx";
-import { useContext, useRef } from "react";
+import UserProgressContext from "../store/UserProgressContext.jsx";
+import Button from "./UI/UI/Button.jsx";
+
+import { useContext } from "react";
 
 export default function Header() {
-  const modal = useRef();
-  const { items } = useContext(CartContext);
+  const cartCtx = useContext(CartContext);
+  const userProgressCtx = useContext(UserProgressContext);
 
-  const cartQuantity = items.length;
+  const cartQuantity = cartCtx.items.reduce((totalNumberOfItems, item) => {
+    return totalNumberOfItems + item.quantity;
+  }, 0);
 
-  function handleOpenCartClick() {
-    modal.current.open();
-  }
-
-  let modalActions = <button>Close</button>;
-
-  if (cartQuantity > 0) {
-    modalActions = (
-      <>
-        <button>Close</button>
-        <button>Checkout</button>
-      </>
-    );
+  function handleShowCart() {
+    userProgressCtx.showCart();
   }
   return (
     <>
-      <CartModal ref={modal} title="Your Cart" actions={modalActions} />
-      <div id="main-header">
+      <header id="main-header">
         <div id="title">
           <img src={headerImg} alt="Header image" />
-          <h1>REACTFOOD</h1>
+          <h1>Shikhar's Restaurant</h1>
         </div>
-        <Button textOnly onClick={handleOpenCartClick}>
-          Cart ({cartQuantity})
-        </Button>
-      </div>
+        <nav>
+          <Button textOnly onClick={handleShowCart}>
+            Cart ({cartQuantity})
+          </Button>
+        </nav>
+      </header>
     </>
   );
 }
