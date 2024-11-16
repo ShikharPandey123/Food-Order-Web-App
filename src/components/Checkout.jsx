@@ -22,7 +22,7 @@ export default function Checkout() {
     error,
     sendRequest,
     clearData,
-  } = useHttp("http://localhost:4000/orders", requestConfig);
+  } = useHttp("https://food-order-web-app-2.onrender.com/orders", requestConfig);
   const totalPrice = cartCtx.items.reduce(
     (itemstotalPrice, item) =>
       itemstotalPrice + parseFloat(item.price) * parseFloat(item.quantity),
