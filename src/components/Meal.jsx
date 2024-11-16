@@ -12,7 +12,7 @@ export default function Meal({ meal }) {
     <article className="meal-item">
       <img
         className="meal-item img"
-        src={`http://localhost:4000/${meal.image}`}
+        src={`https://food-order-web-app-2.onrender.com/${meal.image}`}
         alt={meal.name}
       />
       <div className="meal-item article">
