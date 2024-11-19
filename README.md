@@ -15,6 +15,7 @@ This is a full-stack web application for ordering food online. The project inclu
 ### Frontend
 
 - React
+- Redux(for state management)
 
 ### Backend
 
