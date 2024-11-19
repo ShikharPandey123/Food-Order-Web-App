@@ -24,7 +24,7 @@ export default function Meal({ meal }) {
       {/* Display meal image */}
       <img
         className="meal-item img"
-        src={`http://localhost:4000/${meal.image}`} // Fetch image from backend
+        src={`https://food-order-web-app-2.onrender.com/${meal.image}`}
         alt={meal.name}
       />
 
