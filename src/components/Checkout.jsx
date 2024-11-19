@@ -32,7 +32,8 @@ export default function Checkout() {
     "https://food-order-web-app-2.onrender.com/orders",
     requestConfig
   );
-  const totalPrice = cartCtx.items.reduce(
+  // Calculate total price
+  const totalPrice = cartItems.reduce(
     (itemstotalPrice, item) =>
       itemstotalPrice + parseFloat(item.price) * parseFloat(item.quantity),
     0
