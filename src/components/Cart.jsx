@@ -1,43 +1,60 @@
-import { useContext } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import Button from "./UI/UI/Button.jsx";
 import CartItem from "./CartItem.jsx";
 import { currencyFormatter } from "../util/formatting.js";
 import CartModal from "./UI/UI/CartModal.jsx";
-import CartContext from "../store/CartContext.jsx";
-import UserProgressContext from "../store/UserProgressContext.jsx";
+import { cartActions } from "../store/cart-slice";
+import { uiActions } from "../store/ui-slice";
+import { userProgressActions } from "../store/userProgress-slice";
+
 export default function Cart() {
-  const cartCtx = useContext(CartContext);
-  const userProgressCtx = useContext(UserProgressContext);
-  const totalPrice = cartCtx.items.reduce(
+  const dispatch = useDispatch();
+  const isCartVisible = useSelector((state) => state.ui.isCartVisible);
+  // Access cart and user progress state from Redux
+  const cartItems = useSelector((state) => state.cart.items);
+  const progress = useSelector((state) => state.userProgress.progress);
+
+  // Calculate total price
+  const totalPrice = cartItems.reduce(
     (itemstotalPrice, item) =>
       itemstotalPrice + parseFloat(item.price) * item.quantity,
     0
   );
+
+  // Define event handlers
   function handleCloseCart() {
-    userProgressCtx.hideCart();
+    dispatch(uiActions.hideCart());
   }
+
   function handleGoToCheckout() {
-    userProgressCtx.showCheckout();
+    dispatch(userProgressActions.showCheckout());
   }
-  //console.log(item.price);
-  // console.log("Cart Context Items:", cartCtx.items);
-  // console.log("TotalPrice:", totalPrice);
+
+  function handleIncreaseItem(item) {
+    dispatch(cartActions.addItem(item));
+  }
+
+  function handleDecreaseItem(id) {
+    dispatch(cartActions.removeItem(id));
+  }
+
   return (
     <CartModal
       className="cart"
-      open={userProgressCtx.progress === "cart"}
-      onClose={userProgressCtx.progress === "cart" ? handleCloseCart : null}
+      // open={progress === "cart"}
+      open={isCartVisible}
+      onClose={progress === "cart" ? handleCloseCart : null}
     >
       <h2>Your Cart</h2>
       <ul>
-        {cartCtx.items.map((item) => (
+        {cartItems.map((item) => (
           <CartItem
             key={item.id}
             name={item.name}
             quantity={item.quantity}
             price={item.price}
-            onIncrease={() => cartCtx.addItem(item)}
-            onDecrease={() => cartCtx.removeItem(item.id)}
+            onIncrease={() => handleIncreaseItem(item)}
+            onDecrease={() => handleDecreaseItem(item.id)}
           />
         ))}
       </ul>
@@ -49,7 +66,7 @@ export default function Cart() {
         <Button textOnly onClick={handleCloseCart}>
           Close
         </Button>
-        {cartCtx.items.length > 0 && (
+        {cartItems.length > 0 && (
           <Button onClick={handleGoToCheckout}>Checkout</Button>
         )}
       </p>

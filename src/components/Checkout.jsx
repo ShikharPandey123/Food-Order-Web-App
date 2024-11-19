@@ -1,11 +1,11 @@
-import { useContext } from "react";
-import CartContext from "../store/CartContext.jsx";
+import { useSelector, useDispatch } from "react-redux";
 import CartModal from "./UI/UI/CartModal.jsx";
 import { currencyFormatter } from "../util/formatting.js";
 import Input from "./UI/UI/Input.jsx";
-import UserProgressContext from "../store/UserProgressContext";
 import Button from "./UI/UI/Button.jsx";
 import useHttp from "../hooks/useHttp.js";
+import { cartActions } from "../store/cart-slice";
+import { userProgressActions } from "../store/userProgress-slice";
 
 const requestConfig = {
   method: "POST",
@@ -13,9 +13,15 @@ const requestConfig = {
     "Content-Type": "application/json",
   },
 };
+
 export default function Checkout() {
-  const cartCtx = useContext(CartContext);
-  const userProgressCtx = useContext(UserProgressContext);
+  const dispatch = useDispatch();
+
+  // Access cart items and progress from Redux
+  const cartItems = useSelector((state) => state.cart.items);
+  const progress = useSelector((state) => state.userProgress.progress);
+
+  // HTTP custom hook
   const {
     data,
     isLoading: isSending,
@@ -23,19 +29,25 @@ export default function Checkout() {
     sendRequest,
     clearData,
   } = useHttp("http://localhost:4000/orders", requestConfig);
-  const totalPrice = cartCtx.items.reduce(
+
+  // Calculate total price
+  const totalPrice = cartItems.reduce(
     (itemstotalPrice, item) =>
       itemstotalPrice + parseFloat(item.price) * parseFloat(item.quantity),
     0
   );
+
+  // Event Handlers
   function handleClose() {
-    userProgressCtx.hideCheckout();
+    dispatch(userProgressActions.hideCheckout());
   }
+
   function handleFinish() {
-    userProgressCtx.hideCheckout();
-    cartCtx.clearCart();
+    dispatch(userProgressActions.hideCheckout());
+    dispatch(cartActions.clearCart());
     clearData();
   }
+
   function handleSubmit(event) {
     event.preventDefault();
     const fd = new FormData(event.target);
@@ -43,12 +55,14 @@ export default function Checkout() {
     sendRequest(
       JSON.stringify({
         order: {
-          items: cartCtx.items,
+          items: cartItems,
           customer: customerData,
         },
       })
     );
   }
+
+  // Render dynamic actions
   let actions = (
     <>
       <Button type="button" textOnly onClick={handleClose}>
@@ -60,12 +74,11 @@ export default function Checkout() {
   if (isSending) {
     actions = <span>Sending order data...</span>;
   }
+
+  // Render success message if order is successful
   if (data && !error) {
     return (
-      <CartModal
-        open={userProgressCtx.progress === "checkout"}
-        onClose={handleFinish}
-      >
+      <CartModal open={progress === "checkout"} onClose={handleFinish}>
         <h2>Success!</h2>
         <p>Your order was submitted successfully.</p>
         <p className="modal-actions">
@@ -73,12 +86,11 @@ export default function Checkout() {
         </p>
       </CartModal>
     );
-  } //Success message.
+  }
+
+  // Default checkout form
   return (
-    <CartModal
-      open={userProgressCtx.progress === "checkout"}
-      onClose={handleClose}
-    >
+    <CartModal open={progress === "checkout"} onClose={handleClose}>
       <form onSubmit={handleSubmit}>
         <h2>Checkout</h2>
         <p>Total Amount: {currencyFormatter.format(parseFloat(totalPrice))}</p>

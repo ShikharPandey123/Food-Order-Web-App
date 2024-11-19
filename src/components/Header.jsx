@@ -1,21 +1,21 @@
 import headerImg from "../assets/logo.jpg";
-import CartContext from "../store/CartContext.jsx";
-import UserProgressContext from "../store/UserProgressContext.jsx";
 import Button from "./UI/UI/Button.jsx";
-
-import { useContext } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { uiActions } from "../store/ui-slice"; // Import ui slice
 
 export default function Header() {
-  const cartCtx = useContext(CartContext);
-  const userProgressCtx = useContext(UserProgressContext);
-
-  const cartQuantity = cartCtx.items.reduce((totalNumberOfItems, item) => {
-    return totalNumberOfItems + item.quantity;
-  }, 0);
-
+  const dispatch = useDispatch();
+  const cartQuantity = useSelector((state) =>
+    state.cart.items.reduce(
+      (totalNumberOfItems, item) => totalNumberOfItems + item.quantity,
+      0
+    )
+  );
+  // Function to toggle cart visibility
   function handleShowCart() {
-    userProgressCtx.showCart();
+    dispatch(uiActions.showCart());
   }
+
   return (
     <>
       <header id="main-header">
@@ -24,6 +24,7 @@ export default function Header() {
           <h1>Shikhar's Restaurant</h1>
         </div>
         <nav>
+          {/* Button displays the cart total quantity */}
           <Button textOnly onClick={handleShowCart}>
             Cart ({cartQuantity})
           </Button>
